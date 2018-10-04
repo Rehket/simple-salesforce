@@ -5,6 +5,27 @@ from simple_salesforce import login
 import requests
 import json
 
+SANDBOX_TYPES = ['DEVELOPER', 'DEVELOPER_PRO', 'PARTIAL', 'FULL']
+
+def create_sandbox(name, org_url, token):
+    my_req_url = 'https://' + org_url + '/services/data/v43.0/tooling/sobjects/SandBoxInfo'
+    print(my_req_url)
+
+    headers = {'Authorization': 'Bearer ' + token,
+               'Content-Type': 'application/json'}
+
+    body = {'AutoActivate': True,
+            'Description': 'Test sandbox made with the tooling API',
+            'HistoryDays': 0,
+            'LicenseType': 'DEVELOPER',
+            'SandboxName': name,
+            }
+    print(body)
+    my_request = requests.post(url=my_req_url, headers=headers, data=json.dumps(body))
+    body = my_request.content
+
+    return json.loads(body)
+
 if __name__ == '__main__':
     print(environ.get('SFDC_USER'))
 
@@ -30,18 +51,6 @@ if __name__ == '__main__':
     user_id = info.pop()
     org_id = info.pop()
 
-    my_req_url = 'https://' + url + '/services/data/v43.0/tooling/sobjects/SandBoxInfo'
-    print(my_req_url)
+    create_sandbox('APISBTwo', url, token)
 
-    body = {'AutoActivate': True,
-            'Description': 'Test sandbox made with the tooling API',
-            'HistoryDays': 0,
-            'LicenseType': 'DEVELOPER',
-            'SandboxName': 'APITestSB',
-            }
-    print(body)
-
-    my_request = requests.post(url=my_req_url, headers=headers, data=json.dumps(body))
-    body = my_request.content
-    print(body)
-
+    # SELECT Id, SandBoxName FROM SandboxInfo WHERE SandBoxName='APISBTwo'
