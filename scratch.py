@@ -7,6 +7,7 @@ import json
 
 SANDBOX_TYPES = ['DEVELOPER', 'DEVELOPER_PRO', 'PARTIAL', 'FULL']
 
+
 def create_sandbox(name, org_url, token):
     my_req_url = 'https://' + org_url + '/services/data/v43.0/tooling/sobjects/SandBoxInfo'
     print(my_req_url)
@@ -39,21 +40,34 @@ def fetch_org_info():
     return user_id, org_id
 
 
-def get_sandbox_status(sand_box_name, params=['Id','ActivatedById','ActivatedDate','ApexClassId','AutoActivate','CopyArchivedActivities']):
+def get_sandbox_status(sand_box_name, url, params=None):
+    if params is None:
+        params = ['Id', 'ActivatedById', 'ApexClassId', 'AutoActivate', 'CopyChatter', 'CopyProgress', 'Description',
+                  'EndDate', 'HistoryDays', 'LicenseType', 'RefreshAction', 'SandboxInfoId', 'SandboxName',
+                  'SandboxOrganization', 'SourceId', 'StartDate', 'Status', 'TemplateId', ]
 
-    sandbox_info_url = 'https://' + url + '/services/data/v43.0/tooling/query/?q='
-    query = 'SELECT++FROM+SandBoxProcess+WHERE+SandboxName=\'' + sand_box_name + '\''
+    sandbox_info_url = 'https://' + url + '/services/data/v44.0/tooling/query/?q='
+    query = 'SELECT+' + query_builder(params) + '+FROM+SandBoxProcess+WHERE+SandboxName=\'' + sand_box_name + '\''
 
+    print(query)
     result = requests.get(url=sandbox_info_url + query, headers=headers)
 
     result_dict = json.loads(result.content)
     print(json.dumps(result_dict))
 
 
-def queryBuilder(paramList):
+def query_builder(param_list):
 
-    if len(paramList) == 0:
-        raise ValueError('No paramaters provided')
+    if len(param_list) == 0:
+        raise ValueError('No parameters provided')
+
+    params = (x+',' for x in param_list)
+    param_string = ''
+    for param in params:
+        param_string += param
+    param_string = param_string[:-1]
+
+    return param_string
 
 
 
@@ -69,13 +83,13 @@ if __name__ == '__main__':
 
     job_info = 'https://' + url + '/services/data/v43.0/jobs/ingest'
 
-    jobs = requests.get(url=job_info, headers=headers)
+    # jobs = requests.get(url=job_info, headers=headers)
 
-    print(json.loads(jobs.content))
+    # print(json.loads(jobs.content))
 
     org_info = 'https://' + url + '/services/data/v43.0/'
 
-    get_sandbox_status('DEV')
+    get_sandbox_status('DEV', url)
 
 
     # create_sandbox('APISBTwo', url, token)
