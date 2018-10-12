@@ -26,6 +26,37 @@ def create_sandbox(name, org_url, token):
 
     return json.loads(body)
 
+def fetch_org_info():
+    org_info = 'https://' + url + '/services/data/v43.0/'
+
+    info = requests.get(url=org_info, headers=headers)
+
+    info = json.loads(info.content)['identity']
+    info = info.split('/')
+    user_id = info.pop()
+    org_id = info.pop()
+
+    return user_id, org_id
+
+
+def get_sandbox_status(sand_box_name, params=['Id','ActivatedById','ActivatedDate','ApexClassId','AutoActivate','CopyArchivedActivities']):
+
+    sandbox_info_url = 'https://' + url + '/services/data/v43.0/tooling/query/?q='
+    query = 'SELECT++FROM+SandBoxProcess+WHERE+SandboxName=\'' + sand_box_name + '\''
+
+    result = requests.get(url=sandbox_info_url + query, headers=headers)
+
+    result_dict = json.loads(result.content)
+    print(json.dumps(result_dict))
+
+
+def queryBuilder(paramList):
+
+    if len(paramList) == 0:
+        raise ValueError('No paramaters provided')
+
+
+
 if __name__ == '__main__':
     print(environ.get('SFDC_USER'))
 
@@ -44,13 +75,9 @@ if __name__ == '__main__':
 
     org_info = 'https://' + url + '/services/data/v43.0/'
 
-    info = requests.get(url=org_info, headers=headers)
+    get_sandbox_status('DEV')
 
-    info = json.loads(info.content)['identity']
-    info = info.split('/')
-    user_id = info.pop()
-    org_id = info.pop()
 
-    create_sandbox('APISBTwo', url, token)
+    # create_sandbox('APISBTwo', url, token)
 
     # SELECT Id, SandBoxName FROM SandboxInfo WHERE SandBoxName='APISBTwo'
